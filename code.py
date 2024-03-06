@@ -1,4 +1,4 @@
-with open('somefile.txt') as f:
+with open('C:\\Users\\Vikram\\Desktop\\CO_TEST.txt') as f:
     list = f.readlines()
     l = []
     for i in list:
@@ -46,6 +46,8 @@ regABItoBinary = {"zero": "00000",
                   "t6": "11111",
                   }
 
+VH = False
+
 def decimal_to_b11(decimal_number):
     if decimal_number < -2**11 or decimal_number >= 2**11:
         raise ValueError("Decimal number out of range for 12 bits representation")
@@ -54,6 +56,7 @@ def decimal_to_b11(decimal_number):
     binary_representation = bin(decimal_number)[2:]
     padded_binary = binary_representation.zfill(12)
     return str(padded_binary)
+    
 def decimal_to_b20(decimal_number):
     if decimal_number < -2**19 or decimal_number >= 2**19:
         raise ValueError("Decimal number out of range for 20 bits representation")
@@ -61,7 +64,15 @@ def decimal_to_b20(decimal_number):
         decimal_number = 2**20 + decimal_number
     binary_representation = bin(decimal_number)[2:]
     padded_binary = binary_representation.zfill(20)
+    return str(padded_binary)
 
+def decimal_to_b32(decimal_number):
+    if decimal_number < -2**31 or decimal_number >= 2**31:
+        raise ValueError("Decimal number out of range for 12 bits representation")
+    if decimal_number < 0:
+        decimal_number = 2**32 + decimal_number
+    binary_representation = bin(decimal_number)[2:]
+    padded_binary = binary_representation.zfill(32)
     return str(padded_binary)
 
 def getInstructionType(ins):
@@ -96,18 +107,18 @@ def convertR(instruction):
     rs2 = temp[2]
 
     if instruction[0] == "sub":
-        return (f'0100000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
-                f'{regABItoBinary[rd]}{opcode}\n')
-    return (f'0000000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
-                f'{regABItoBinary[rd]}{opcode}\n')
+        return (f'0100000{regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[instruction[0]]}'
+                f' {regABItoBinary[rd]} {opcode}\n')
+    return (f'0000000{regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[instruction[0]]} '
+                f'{regABItoBinary[rd]} {opcode}\n')
 
 def convertI(instruction):
-    funct3 = {"lw": "010", "lb": "010", "lh": "010", "ld": "010",
+    funct3 = {"lw": "010",
               "addi": "000",
               "sltiu": "011",
               "jalr": "000"
               }
-    opcode = {"lw": "0000011", "lb": "0000011", "lh": "0000011", "ld": "0000011",
+    opcode = {"lw": "0000011",
               "addi": "0010011",
               "sltiu": "0010011",
               "jalr": "1100111"
@@ -118,26 +129,28 @@ def convertI(instruction):
         rd = temp[0]
         rs = temp[1]
         imm = temp[2]
-        return f'{decimal_to_b11(int(imm))}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
+        imm_b = decimal_to_b32(int(imm))
+        return f'{imm_b[20:]} {regABItoBinary[rs]} {funct3[ins_name]} {regABItoBinary[rd]} {opcode[ins_name]}'
     else:
         temp = instruction[1].split(',')
         temp2 = temp[1].split('(')
         rd = temp[0]
         rs = temp2[1].rstrip(')')
         imm = temp2[0]
-        return f'{decimal_to_b11(int(imm))}{regABItoBinary[rs]}{funct3[ins_name]}{regABItoBinary[rd]}{opcode[ins_name]}'
+        imm_b = decimal_to_b32(int(imm))
+        return f'{imm_b[20:]} {regABItoBinary[rs]} {funct3[ins_name]} {regABItoBinary[rd]} {opcode[ins_name]}'
 
 def convertS(instruction):
-    opcode = {"sw": "0100011", "sb": "0100011", "sh": "0100011", "sd": "0100011"}
-    funct3 = {"sw": "010", "sb": "010", "sh": "010", "sd": "010"}
+    opcode = {"sw": "0100011"}
+    funct3 = {"sw": "010"}
     ins_name = instruction[0]
     temp = instruction[1].split(',')
     temp2 = temp[1].split('(')
-    rd = temp[0]
-    rt = temp2[1].rstrip(')')
+    rs2 = temp[0]
+    rs1 = temp2[1].rstrip(')')
     imm = temp2[0]
     imm_b = decimal_to_b11(int(imm))
-    return f'{imm_b[0:7]}{regABItoBinary[rd]}{regABItoBinary[rt]}{funct3[ins_name]}{imm_b[7:]}{opcode[ins_name]}'
+    return f'{imm_b[0:7]} {regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[ins_name]} {imm_b[7:]} {opcode[ins_name]}'
 
 def convertB(instruction):
     opcode = "1100011"
@@ -150,41 +163,52 @@ def convertB(instruction):
               }
     ins_name = instruction[0]
     rs1,rs2,imm = instruction[1].split(',')
-    imm_b = decimal_to_b11(int(imm))
-    return
+    imm_b = decimal_to_b32(int(imm))
+    return (f'{imm_b[19]} {imm_b[21:27]} {regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[ins_name]}'
+            f' {imm_b[27:31]} {imm_b[20]} {opcode}')
 
 def convertU(instruction):
     opcode = {"lui": "0110111",
               "auipc": "0010111"}
     ins_name = instruction[0]
     rd, imm = instruction[1].split(',')
-    return f'{decimal_to_b20(int(imm))}{regABItoBinary[rd]}{opcode[ins_name]}'
+    imm_b = decimal_to_b32(int(imm))
+    return f'{imm_b[:20]} {regABItoBinary[rd]} {opcode[ins_name]}'
 
 def convertJ(instruction):
-    opcode = "0010111"
+    opcode = "1100111"
     rd,imm = instruction[1].split(',')
-    imm_b = decimal_to_b20(int(imm))
-    print(imm_b)
-    return f'{imm_b[0]} {imm_b[10:]} {imm_b[9]} {imm_b[1:9]} {regABItoBinary[rd]} {opcode}'
+    imm_b = decimal_to_b32(int(imm))
+    return f'{imm_b[11]} {imm_b[21:31]} {imm_b[20]} {imm_b[12:20]} {regABItoBinary[rd]} {opcode}'
 
 for instruction in l:
     ins_type = getInstructionType(instruction[0])
     if ins_type == "R":
-        convertR(instruction)
+        s = convertR(instruction)
     elif ins_type == "I":
-        convertI(instruction)
+        s = convertI(instruction)
     elif ins_type == "S":
-        convertS(instruction)
+        s = convertS(instruction)
     elif ins_type == "B":
-        convertB(instruction)
+        s = convertB(instruction)
+        if instruction == ["beq", "zero,zero,0"]:
+             VH = True
     elif ins_type == "U":
-        convertU(instruction)
+        s = convertU(instruction)
     elif ins_type == "J":
-        convertJ(instruction)
+        s = convertJ(instruction)
     else:
         with open("binary.txt", mode='w') as f:
             f.write("ERROR")
         break
+    with open("binary.txt", mode='a') as f:
+        f.write(s+"\n")
 
-s = convertJ(['jal', 'ra,-1024'])
-print(s)
+# if not VH:
+#     with open("binary.txt", mode='w') as f:
+#         f.write("ERROR")
+# else:
+#     pass
+#
+# s = convertJ(['jal', 'ra,-1024'])
+# print(s)
