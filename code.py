@@ -173,7 +173,13 @@ def convertB(instruction):
               }
     ins_name = instruction[0]
     rs1, rs2, imm = instruction[1].split(',')
-    imm_b = decimal_to_b32(int(imm))
+    try:
+        imm_b = decimal_to_b32(int(imm))
+    except:
+        val = label[imm]
+        imm = (val - index)*4
+        # print(imm)
+        imm_b = decimal_to_b32(int(imm))
     return (f'{imm_b[19]} {imm_b[21:27]} {regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[ins_name]}'
             f' {imm_b[27:31]} {imm_b[20]} {opcode}')
 
