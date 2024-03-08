@@ -112,6 +112,12 @@ def convertR(instruction):
     rd = temp[0]
     rs1 = temp[1]
     rs2 = temp[2]
+    try:
+        regABItoBinary[rs2]
+        regABItoBinary[rs1]
+        regABItoBinary[rd]
+    except:
+        return -1
 
     if instruction[0] == "sub":
         return (f'0100000{regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[instruction[0]]}'
@@ -136,6 +142,12 @@ def convertI(instruction):
         temp = instruction[1].split(',')
         rd = temp[0]
         rs = temp[1]
+
+        try:
+            regABItoBinary[rs]
+            regABItoBinary[rd]
+        except:
+            return -1
         imm = temp[2]
         imm_b = decimal_to_b32(int(imm))
         return f'{imm_b[20:]} {regABItoBinary[rs]} {funct3[ins_name]} {regABItoBinary[rd]} {opcode[ins_name]}'
@@ -144,6 +156,11 @@ def convertI(instruction):
         temp2 = temp[1].split('(')
         rd = temp[0]
         rs = temp2[1].rstrip(')')
+        try:
+            regABItoBinary[rs]
+            regABItoBinary[rd]
+        except:
+            return -1
         imm = temp2[0]
         imm_b = decimal_to_b32(int(imm))
         return f'{imm_b[20:]} {regABItoBinary[rs]} {funct3[ins_name]} {regABItoBinary[rd]} {opcode[ins_name]}'
@@ -157,6 +174,11 @@ def convertS(instruction):
     temp2 = temp[1].split('(')
     rs2 = temp[0]
     rs1 = temp2[1].rstrip(')')
+    try:
+            regABItoBinary[rs1]
+            regABItoBinary[rs2]
+        except:
+            return -1
     imm = temp2[0]
     imm_b = decimal_to_b11(int(imm))
     return f'{imm_b[0:7]} {regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[ins_name]} {imm_b[7:]} {opcode[ins_name]}'
@@ -180,6 +202,11 @@ def convertB(instruction):
         imm = (val - index)*4
         # print(imm)
         imm_b = decimal_to_b32(int(imm))
+    try:
+            regABItoBinary[rs1]
+            regABItoBinary[rs2]
+        except:
+            return -1
     return (f'{imm_b[19]} {imm_b[21:27]} {regABItoBinary[rs2]} {regABItoBinary[rs1]} {funct3[ins_name]}'
             f' {imm_b[27:31]} {imm_b[20]} {opcode}')
 
@@ -189,6 +216,10 @@ def convertU(instruction):
               "auipc": "0010111"}
     ins_name = instruction[0]
     rd, imm = instruction[1].split(',')
+    try:
+            regABItoBinary[rd]
+        except:
+            return -1
     imm_b = decimal_to_b32(int(imm))
     return f'{imm_b[:20]} {regABItoBinary[rd]} {opcode[ins_name]}'
 
@@ -202,6 +233,10 @@ def convertJ(instruction, index):
         imm = (val - index)*4
         # print(imm)
         imm_b = decimal_to_b32(int(imm))
+    try:
+            regABItoBinary[rd]
+        except:
+            return -1
     return f'{imm_b[11]} {imm_b[21:31]} {imm_b[20]} {imm_b[12:20]} {regABItoBinary[rd]} {opcode}'
 
 
@@ -234,15 +269,19 @@ for index in range(len(l)):
     else:
         print(instruction[0])
         with open("binary.txt", mode='w') as f:
-            f.write("ERROR1")
+            f.write("ERROR..Invalid Instruction name")
         break
     print("adding....", end=" ")
     print(" ".join(instruction))
+    if s==-1:
+        with open("binary.txt", mode='w') as f:
+            f.write("ERROR..Invalid ABI register name")
+        break
     with open("binary.txt", mode='a') as f:
         f.write(s + "\n")
 
 if not VH:
     with open("binary.txt", mode='w') as f:
-        f.write("ERROR")
+        f.write("ERROR..Virtual Halt not present")
 else:
     pass
