@@ -263,7 +263,7 @@ for index in range(len(l)):
         # print(instruction[0])
         with open("binary.txt", mode='w') as f:
             # print(instruction)
-            print("ERROR..Invalid Instruction name")
+            print(f"ERROR..Invalid Instruction name at line no {index+1}")
             f.write("ERROR..Invalid Instruction name")
         break
     # print("adding....", end=" ")
@@ -271,7 +271,7 @@ for index in range(len(l)):
     if s==-1:
         with open("binary.txt", mode='w') as f:
 
-            print("ERROR..Invalid ABI register name")
+            print(f"ERROR..Invalid ABI register name at line no {index+1}")
             f.write("ERROR..Invalid ABI register name")
         break
     with open("binary.txt", mode='a') as f:
