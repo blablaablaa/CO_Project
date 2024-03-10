@@ -233,17 +233,19 @@ def convertJ(instruction, index):
     return f'{imm_b[11]}{imm_b[21:31]}{imm_b[20]}{imm_b[12:20]}{regABItoBinary[rd]}{opcode}'
 
 
-l = [instruction for instruction in l if instruction]
+# l = [instruction for instruction in l if instruction]
 for address_instruction in range(len(l)):
     instruct = l[address_instruction]
     if ":" in instruct[0]:
         lab = instruct[0][:-1]
         label[lab] = address_instruction
-        l[address_instruction] = instruct[1:]
+        # l[address_instruction] = instruct[1:]
 # print(l)
-l = [instruction for instruction in l if instruction]
+# l = [instruction for instruction in l if instruction]
 for index in range(len(l)):
     instruction = l[index]
+    if len(instruction) == 0 or len(instruction) == 1:
+        continue
     ins_type = getInstructionType(instruction[0])
     if ins_type == "R":
         s = convertR(instruction)
