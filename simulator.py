@@ -19,6 +19,18 @@ def get_instruction_type(ins):
     if opcode == "1101111":
         return "J"
     return "Z"
+     
+def decimal_to_unsigned_binary(decimal_number):
+    binary_string = bin(decimal_number & 0xFFFFFFFF)[2:].zfill(32)
+    return binary_string
+     
+def decimal_to_twos_complement(decimal_number):
+    binary_string = bin(decimal_number & 0xFFFFFFFF)[2:].zfill(32)
+    if decimal_number >= 0:
+        return binary_string
+    inverted_string = ''.join('1' if bit == '0' else '0' for bit in binary_string)
+    twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
+    return twos_complement
 
 PC = 0
 x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12 = 0,0,0,0,0,0,0,0,0,0,0,0,0
