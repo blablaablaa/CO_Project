@@ -31,6 +31,17 @@ def decimal_to_twos_complement(decimal_number):
     inverted_string = ''.join('1' if bit == '0' else '0' for bit in binary_string)
     twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
     return twos_complement
+     
+def add_twos_complement(binary1, binary2): ##ye overflow ko ignore karega aur addition kardega.eg: max number + 1 = 0
+    num1 = int(binary1, 2)
+    num2 = int(binary2, 2)
+    result = num1 + num2
+    result_binary = bin(result & 0xFFFFFFFF)[2:].zfill(32)
+    if result >= 0:
+        return result_binary
+    inverted_string = ''.join('1' if bit == '0' else '0' for bit in result_binary)
+    twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
+    return twos_complement
 
 PC = 0
 x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12 = 0,0,0,0,0,0,0,0,0,0,0,0,0
