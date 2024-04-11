@@ -43,6 +43,27 @@ def add_twos_complement(binary1, binary2): ##ye overflow ko ignore karega aur ad
     twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
     return twos_complement
 
+def bitwise_and(binary1, binary2):
+    num1 = int(binary1, 2)
+    num2 = int(binary2, 2)
+    result = num1 & num2
+    result_binary = bin(result)[2:].zfill(len(binary1))
+    return result_binary
+
+def bitwise_or(binary1, binary2):
+    num1 = int(binary1, 2)
+    num2 = int(binary2, 2)
+    result = num1 | num2
+    result_binary = bin(result)[2:].zfill(len(binary1))
+    return result_binary
+
+def bitwise_xor(binary1, binary2):
+    num1 = int(binary1, 2)
+    num2 = int(binary2, 2)
+    result = num1 ^ num2
+    result_binary = bin(result)[2:].zfill(len(binary1))
+    return result_binary
+
 PC = 0
 x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12 = 0,0,0,0,0,0,0,0,0,0,0,0,0
 x13,x14,x15,x16,x17,x18,x19,x20,x21,x22,x23,x24,x25 = 0,0,0,0,0,0,0,0,0,0,0,0,0
