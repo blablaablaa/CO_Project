@@ -1,9 +1,11 @@
 with open('C:\\Users\\Vikram\\Desktop\\binary.txt') as f:
-     list = f.readlines()
-     l = []
-     for i in list:
-         l.append(i.rstrip("\n"))
+    list = f.readlines()
+    l = []
+    for i in list:
+        l.append(i.rstrip("\n"))
 l = []
+
+
 def get_instruction_type(ins):
     opcode = ins[25:]
     if opcode == "0110011":
@@ -19,11 +21,13 @@ def get_instruction_type(ins):
     if opcode == "1101111":
         return "J"
     return "Z"
-     
+
+
 def decimal_to_unsigned_binary(decimal_number):
     binary_string = bin(decimal_number & 0xFFFFFFFF)[2:].zfill(32)
     return binary_string
-     
+
+
 def decimal_to_twos_complement(decimal_number):
     binary_string = bin(decimal_number & 0xFFFFFFFF)[2:].zfill(32)
     if decimal_number >= 0:
@@ -31,8 +35,9 @@ def decimal_to_twos_complement(decimal_number):
     inverted_string = ''.join('1' if bit == '0' else '0' for bit in binary_string)
     twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
     return twos_complement
-     
-def add_twos_complement(binary1, binary2): ##ye overflow ko ignore karega aur addition kardega.eg: max number + 1 = 0
+
+
+def add_twos_complement(binary1, binary2):  ##ye overflow ko ignore karega aur addition kardega.eg: max number + 1 = 0
     num1 = int(binary1, 2)
     num2 = int(binary2, 2)
     result = num1 + num2
@@ -43,12 +48,14 @@ def add_twos_complement(binary1, binary2): ##ye overflow ko ignore karega aur ad
     twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
     return twos_complement
 
+
 def bitwise_and(binary1, binary2):
     num1 = int(binary1, 2)
     num2 = int(binary2, 2)
     result = num1 & num2
     result_binary = bin(result)[2:].zfill(len(binary1))
     return result_binary
+
 
 def bitwise_or(binary1, binary2):
     num1 = int(binary1, 2)
@@ -57,6 +64,7 @@ def bitwise_or(binary1, binary2):
     result_binary = bin(result)[2:].zfill(len(binary1))
     return result_binary
 
+
 def bitwise_xor(binary1, binary2):
     num1 = int(binary1, 2)
     num2 = int(binary2, 2)
@@ -64,43 +72,67 @@ def bitwise_xor(binary1, binary2):
     result_binary = bin(result)[2:].zfill(len(binary1))
     return result_binary
 
+def sext(binary_str):
+    return binary_to_decimal_twos_complement(binary_str)
+
+def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement binary to decimal
+    if binary_str[0] == '1':
+        binary_str = ''.join(['1' if bit == '0' else '0' for bit in binary_str])
+        binary_str = bin(int(binary_str, 2) + 1)[2:].zfill(32)
+        decimal_value = int(binary_str, 2)
+        decimal_value = -decimal_value
+    else:
+        decimal_value = int(binary_str, 2)
+    return decimal_value
+def unsigned(binary_str):
+    num_zeroes = 32 - len(binary_str)
+    extended_str = '0' * num_zeroes + binary_str
+    return extended_str
+
+def binary_to_decimal_signed(binary_str):  ##converts signed binary to decimal
+    if binary_str[0] == '1':
+        decimal_value = -int(binary_str[1:], 2)
+    else:
+        decimal_value = int(binary_str, 2)
+    return decimal_value
+
+def signed(binary_str):
+    return binary_to_decimal_signed(binary_str)
+
 PC = 0
-x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12 = 0,0,0,0,0,0,0,0,0,0,0,0,0
-x13,x14,x15,x16,x17,x18,x19,x20,x21,x22,x23,x24,x25 = 0,0,0,0,0,0,0,0,0,0,0,0,0
-x26,x27,x28,x29,x30,x31 = 0,0,0,0,0,0
-regBinToName = {"00000" : x0,
-                  "00001" : x1,
-                  "00010" : x2,
-                  "00011": x3,
-                  "00100": x4,
-                  "00101": x5,
-                  "00110": x6,
-                  "00111": x7,
-                  "01000": x8, #"fp": "01000",
-                  "01001": x9,
-                  "01010": x10,
-                  "01011": x11,
-                  "01100": x12,
-                  "01101": x13,
-                  "01110": x14,
-                  "01111": x15,
-                  "10000": x16,
-                  "10001": x17,
-                  "10010": x18,
-                  "10011": x19,
-                  "10100": x20,
-                  "10101": x21,
-                  "10110": x22,
-                  "10111": x23,
-                  "11000": x24,
-                  "11001": x25,
-                  "11010": x26,
-                  "11011": x27,
-                  "11100": x28,
-                  "11101": x29,
-                  "11110": x30,
-                  "11111": x31,
-                  }
+regBinToName = {"00000": "00000000000000000000000000000000",
+                "00001": "00000000000000000000000000000000",
+                "00010": "00000000000000000000000000000000",
+                "00011": "00000000000000000000000000000000",
+                "00100": "00000000000000000000000000000000",
+                "00101": "00000000000000000000000000000000",
+                "00110": "00000000000000000000000000000000",
+                "00111": "00000000000000000000000000000000",
+                "01000": "00000000000000000000000000000000",  # "fp": "01000",
+                "01001": "00000000000000000000000000000000",
+                "01010": "00000000000000000000000000000000",
+                "01011": "00000000000000000000000000000000",
+                "01100": "00000000000000000000000000000000",
+                "01101": "00000000000000000000000000000000",
+                "01110": "00000000000000000000000000000000",
+                "01111": "00000000000000000000000000000000",
+                "10000": "00000000000000000000000000000000",
+                "10001": "00000000000000000000000000000000",
+                "10010": "00000000000000000000000000000000",
+                "10011": "00000000000000000000000000000000",
+                "10100": "00000000000000000000000000000000",
+                "10101": "00000000000000000000000000000000",
+                "10110": "00000000000000000000000000000000",
+                "10111": "00000000000000000000000000000000",
+                "11000": "00000000000000000000000000000000",
+                "11001": "00000000000000000000000000000000",
+                "11010": "00000000000000000000000000000000",
+                "11011": "00000000000000000000000000000000",
+                "11100": "00000000000000000000000000000000",
+                "11101": "00000000000000000000000000000000",
+                "11110": "00000000000000000000000000000000",
+                "11111": "00000000000000000000000000000000",
+                }
 
 def func_R(ins):
     funct7 = ins[0:7]
@@ -109,29 +141,76 @@ def func_R(ins):
     funct3 = ins[17:20]
     rd = regBinToName[ins[20:25]]
 
+    if funct7 == "0000000":
+        if funct3 == "000": #add
+            rd = add_twos_complement(sext(rs1), sext(rs2))
+            regBinToName[ins[20:25]] = rd
+        elif funct3 == "001": #sll
+            shift_amount = int(unsigned(rs2)[-5:], 2)
+            result = int(rs1, 2) << shift_amount
+            rd = bin(result)[2:].zfill(32)
+            regBinToName[ins[20:25]] = rd
+        elif funct3 == "010": #slt
+            if sext(rs1) < sext(rs2):
+                rd = "00000000000000000000000000000001"
+                regBinToName[ins[20:25]] = rd
+        elif funct3 == "011": #sltu
+            if int(unsigned(rs1),2) < int(unsigned(rs2),2):
+                rd = "00000000000000000000000000000001"
+                regBinToName[ins[20:25]] = rd
+        elif funct3 == "100": #xor
+            rd = bitwise_xor(rs1,rs2)
+            regBinToName[ins[20:25]] = rd
+        elif funct3 == "101": #srl
+            shift_amount = int(unsigned(rs2)[-5:], 2)
+            result = int(rs1, 2) >> shift_amount
+            rd = bin(result)[2:].zfill(32)
+            regBinToName[ins[20:25]] = rd
+        elif funct3 == "110": #or:
+            rd = bitwise_or(rs1, rs2)
+            regBinToName[ins[20:25]] = rd
+        elif funct3 == "111": #and
+            rd = bitwise_and(rs1, rs2)
+            regBinToName[ins[20:25]] = rd
+    elif funct7 == "0100000": #sub
+        rs1 = signed(rs1)
+        rs2 = signed(rs2)
+        rd = rs1-rs2
+        rd = decimal_to_twos_complement(rd)
+        regBinToName[ins[20:25]] = rd
+
 def func_I(ins):
     imm_bin = ins[0:12]
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
     rd = regBinToName[ins[20:25]]
+
+
 def func_S(ins):
     imm_bin = ins[0:7] + ins[20:25]
     rs2 = ins[7:12]
     rs1 = ins[12:17]
     funct3 = ins[17:20]
+
+
 def func_B(ins):
     imm_bin = ins[0:7] + ins[20:25]
     rs2 = ins[7:12]
     rs1 = ins[12:17]
     funct3 = ins[17:20]
+
+
 def func_U(ins):
     imm = ins[0:20]
     rd = ins[20:25]
+
+
 def func_J(ins):
     imm = ins[0:20]
     rd = ins[20:25]
 
-while PC<len(l):
+
+while PC < len(l):
     ins = l[PC]
     ins_type = get_instruction_type(ins)
     if ins_type == "R":
