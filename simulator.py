@@ -1,9 +1,9 @@
 with open('C:\\Users\\Vikram\\Desktop\\binary.txt') as f:
     list = f.readlines()
-    l = []
+    li = []
     for i in list:
-        l.append(i.rstrip("\n"))
-l = []
+        li.append(i.rstrip("\n"))
+# l = []
 
 
 def get_instruction_type(ins):
@@ -29,12 +29,12 @@ def decimal_to_unsigned_binary(decimal_number):
 
 
 def decimal_to_twos_complement(decimal_number):
-    binary_string = bin(decimal_number & 0xFFFFFFFF)[2:].zfill(32)
-    if decimal_number >= 0:
-        return binary_string
-    inverted_string = ''.join('1' if bit == '0' else '0' for bit in binary_string)
-    twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
-    return twos_complement
+    binary_string = bin(abs(decimal_number) & 0xFFFFFFFF)[2:].zfill(32)
+    if decimal_number < 0:
+        inverted_string = ''.join('1' if bit == '0' else '0' for bit in binary_string)
+        twos_complement = bin(int(inverted_string, 2) + 1)[2:].zfill(32)
+        return twos_complement
+    return binary_string
 
 
 def add_twos_complement(binary1, binary2):  ##ye overflow ko ignore karega aur addition kardega.eg: max number + 1 = 0
@@ -99,7 +99,62 @@ def binary_to_decimal_signed(binary_str):  ##converts signed binary to decimal
 def signed(binary_str):
     return binary_to_decimal_signed(binary_str)
 
-PC = 0
+def sign_extend(binary_str):
+    is_negative = binary_str[0] == '1'
+    extension = '1' if is_negative else '0'
+    extend_length = 32 - len(binary_str)
+    extended_binary_str = extension * extend_length + binary_str
+    return extended_binary_str
+
+
+def binary_to_hex(binary_str):
+    binary_str = binary_str.zfill((len(binary_str) + 3) // 4 * 4)
+    chunks = [binary_str[i:i + 4] for i in range(0, len(binary_str), 4)]
+    hex_str = ''.join(hex(int(chunk, 2))[2:] for chunk in chunks)
+    return hex_str
+
+def hex_to_binary(hex_str):
+    binary_digits = [bin(int(hex_digit, 16))[2:].zfill(4) for hex_digit in hex_str]
+    binary_str = ''.join(binary_digits)
+    binary_str = binary_str.zfill(32)
+    return binary_str
+
+PC = "00000000"
+
+data_mem = {
+    "0x00010000":"00000000000000000000000000000000",
+    "0x00010004":"00000000000000000000000000000000",
+    "0x00010008":"00000000000000000000000000000000",
+    "0x0001000c":"00000000000000000000000000000000",
+    "0x00010010":"00000000000000000000000000000000",
+    "0x00010014":"00000000000000000000000000000000",
+    "0x00010018":"00000000000000000000000000000000",
+    "0x0001001c":"00000000000000000000000000000000",
+    "0x00010020":"00000000000000000000000000000000",
+    "0x00010024":"00000000000000000000000000000000",
+    "0x00010028":"00000000000000000000000000000000",
+    "0x0001002c":"00000000000000000000000000000000",
+    "0x00010030":"00000000000000000000000000000000",
+    "0x00010034":"00000000000000000000000000000000",
+    "0x00010038":"00000000000000000000000000000000",
+    "0x0001003c":"00000000000000000000000000000000",
+    "0x00010040":"00000000000000000000000000000000",
+    "0x00010044":"00000000000000000000000000000000",
+    "0x00010048":"00000000000000000000000000000000",
+    "0x0001004c":"00000000000000000000000000000000",
+    "0x00010050":"00000000000000000000000000000000",
+    "0x00010054":"00000000000000000000000000000000",
+    "0x00010058":"00000000000000000000000000000000",
+    "0x0001005c":"00000000000000000000000000000000",
+    "0x00010060":"00000000000000000000000000000000",
+    "0x00010064":"00000000000000000000000000000000",
+    "0x00010068":"00000000000000000000000000000000",
+    "0x0001006c":"00000000000000000000000000000000",
+    "0x00010070":"00000000000000000000000000000000",
+    "0x00010074":"00000000000000000000000000000000",
+    "0x00010078":"00000000000000000000000000000000",
+    "0x0001007c":"00000000000000000000000000000000",
+}
 regBinToName = {"00000": "00000000000000000000000000000000",
                 "00001": "00000000000000000000000000000000",
                 "00010": "00000000000000000000000000000000",
@@ -139,14 +194,14 @@ def func_R(ins):
     rs2 = regBinToName[ins[7:12]]
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
-    rd = regBinToName[ins[20:25]]
+    #rd = regBinToName[ins[20:25]]
 
     if funct7 == "0000000":
         if funct3 == "000": #add
-            rd = add_twos_complement(sext(rs1), sext(rs2))
+            rd = add_twos_complement(rs1, rs2)
             regBinToName[ins[20:25]] = rd
         elif funct3 == "001": #sll
-            shift_amount = int(unsigned(rs2)[-5:], 2)
+            shift_amount = int(rs2[-5:], 2)
             result = int(rs1, 2) << shift_amount
             rd = bin(result)[2:].zfill(32)
             regBinToName[ins[20:25]] = rd
@@ -154,9 +209,15 @@ def func_R(ins):
             if sext(rs1) < sext(rs2):
                 rd = "00000000000000000000000000000001"
                 regBinToName[ins[20:25]] = rd
+            else:
+                rd = "00000000000000000000000000000000"
+                regBinToName[ins[20:25]] = rd
         elif funct3 == "011": #sltu
             if int(unsigned(rs1),2) < int(unsigned(rs2),2):
                 rd = "00000000000000000000000000000001"
+                regBinToName[ins[20:25]] = rd
+            else:
+                rd = "00000000000000000000000000000000"
                 regBinToName[ins[20:25]] = rd
         elif funct3 == "100": #xor
             rd = bitwise_xor(rs1,rs2)
@@ -184,44 +245,111 @@ def func_I(ins):
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
     rd = regBinToName[ins[20:25]]
-
+    if funct3 == "010": #lw
+        mem_ind = add_twos_complement(rs1, sign_extend(imm_bin))
+        mem_ind = binary_to_hex(mem_ind)
+        mem_ind = "0x"+mem_ind
+        rd = data_mem[mem_ind]
+        regBinToName[ins[20:25]] = rd
+    elif funct3 == "000": #addi
+        rd = add_twos_complement(rs1, sign_extend(imm_bin))
+        regBinToName[ins[20:25]] = rd
+    elif funct3 == "011": #sltiu
+        if int(rs1,2) < int(sign_extend(imm_bin),2):
+            rd = "00000000000000000000000000000001"
+            regBinToName[ins[20:25]] = rd
+        else:
+            rd = "00000000000000000000000000000000"
+            regBinToName[ins[20:25]] = rd
+    elif funct3 == "000": #jalr
+        global PC
+        rd = add_twos_complement(hex_to_binary(PC), unsigned("100"))  # rd = PC+4
+        PC = add_twos_complement(rs1, sign_extend(imm_bin))
+        PC = PC[:-1] + "0"
+        regBinToName[ins[20:25]] = rd
 
 def func_S(ins):
     imm_bin = ins[0:7] + ins[20:25]
-    rs2 = ins[7:12]
-    rs1 = ins[12:17]
+    rs2 = regBinToName[ins[7:12]]
+    rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
+    mem_ind = add_twos_complement(rs1, sign_extend(imm_bin))
+    mem_ind = binary_to_hex(mem_ind)
+    mem_ind = "0x" + mem_ind
+    data_mem[mem_ind] = rs2
 
 
 def func_B(ins):
+    global PC
     imm_bin = ins[0:7] + ins[20:25]
-    rs2 = ins[7:12]
-    rs1 = ins[12:17]
+    rs2 = regBinToName[ins[7:12]]
+    rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
+    if funct3 == "000": #beq
+        if rs1 == rs2:
+            # t = hex_to_binary(PC)
+            PC = add_twos_complement(PC, sign_extend(imm_bin+"0"))
+            # PC = binary_to_hex(t)
+    elif funct3 == "001": #bne
+        if rs1 != rs2:
+            # t = hex_to_binary(PC)
+            PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+            # PC = binary_to_hex(t)
+    elif funct3 == "100": #blt
+        if sext(rs1) < sext(rs2):
+            # t = hex_to_binary(PC)
+            PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+            # PC = binary_to_hex(t)
+    elif funct3 == "101":
+        if sext(rs1) >= sext(rs2):
+            # t = hex_to_binary(PC)
+            PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+            # PC = binary_to_hex(t)
 
-
-def func_U(ins):
+def func_U(ins, PC):
     imm = ins[0:20]
-    rd = ins[20:25]
-
+    opcode = ins[25:]
+    if opcode == "0110111": #lui
+        rd = imm + 12*"0"
+        regBinToName[ins[20:25]] = rd
+    elif opcode == "0010111": #auipc
+        rd = add_twos_complement(imm + 12*"0", hex_to_binary(PC))
+        regBinToName[ins[20:25]] = rd
 
 def func_J(ins):
+    global PC
     imm = ins[0:20]
-    rd = ins[20:25]
+   # rd = ins[20:25]
+    imm = sign_extend(imm + "0")
+    rd = add_twos_complement(PC, unsigned("100")) #rd = PC+4
+    # PC = hex_to_binary(PC)
+    PC = add_twos_complement(PC, imm)
+    # PC = binary_to_hex(PC)
+    PC = PC[:-1] + "0"
+    regBinToName[ins[20:25]] = rd
 
+l = dict()
+for i in range(len(li)):
+    l[decimal_to_unsigned_binary(i*4)] = li[i]
+    # i+=1
 
-while PC < len(l):
+while True:
     ins = l[PC]
     ins_type = get_instruction_type(ins)
     if ins_type == "R":
         func_R(ins)
+        PC = add_twos_complement(PC, "100")
     elif ins_type == "I":
         func_I(ins)
     elif ins_type == "S":
         func_S(ins)
+        PC = add_twos_complement(PC, "100")
     elif ins_type == "B":
         func_B(ins)
+        if ins == "00000000000000000000000001100011":
+            break
     elif ins_type == "U":
-        func_U(ins)
+        func_U(ins,PC)
+        PC = add_twos_complement(PC, "100")
     elif ins_type == "J":
         func_J(ins)
