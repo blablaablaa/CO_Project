@@ -1,4 +1,4 @@
-with open('C:\\Users\\nikhil\\Desktop\\binary.txt') as f:
+with open("C:\\Users\\nikhil\\Desktop\Testing\\s_q_test1.txt") as f:
     list = f.readlines()
     li = []
     for i in list:
@@ -74,7 +74,6 @@ def bitwise_xor(binary1, binary2):
 
 def sext(binary_str):
     return binary_to_decimal_twos_complement(binary_str)
-# if binary str is of imm then it is error
 def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement binary to decimal
     if binary_str[0] == '1':
         binary_str = ''.join(['1' if bit == '0' else '0' for bit in binary_str])
@@ -84,7 +83,7 @@ def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement bi
     else:
         decimal_value = int(binary_str, 2)
     return decimal_value
-# iska nam sext nahi hona chaiye
+    
 def unsigned(binary_str):
     num_zeroes = 32 - len(binary_str)
     extended_str = '0' * num_zeroes + binary_str
@@ -107,20 +106,7 @@ def sign_extend(binary_str):
     extended_binary_str = extension * extend_length + binary_str
     return extended_binary_str
 
-
-def binary_to_hex(binary_str):
-    binary_str = binary_str.zfill((len(binary_str) + 3) // 4 * 4)
-    chunks = [binary_str[i:i + 4] for i in range(0, len(binary_str), 4)]
-    hex_str = ''.join(hex(int(chunk, 2))[2:] for chunk in chunks)
-    return hex_str
-# 
-# def hex_to_binary(hex_str):
-#     binary_digits = [bin(int(hex_digit, 16))[2:].zfill(4) for hex_digit in hex_str]
-#     binary_str = ''.join(binary_digits)
-#     binary_str = binary_str.zfill(32)
-#     return binary_str
-
-PC = "00000000"
+PC = "00000000000000000000000000000000"
 
 data_mem = {
     "0x00010000":"00000000000000000000000000000000",
@@ -195,7 +181,7 @@ def func_R(ins):
     rs2 = regBinToName[ins[7:12]]
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
-
+    print("HERE\n")
     if funct7 == "0000000":
         if funct3 == "000": #add
             rd = add_twos_complement(rs1, rs2)
@@ -239,6 +225,8 @@ def func_R(ins):
         rd = rs1-rs2
         rd = decimal_to_twos_complement(rd)
         regBinToName[ins[20:25]] = rd
+    print("HERE\n")
+
 
 def func_I(ins):
     imm_bin = ins[0:12]
@@ -288,33 +276,39 @@ def func_S(ins):
 
 def func_B(ins):
     global PC
-    imm_bin = ins[0:7] + ins[20:25]
+    imm_bin = ins[0] + ins[24] + ins[1:7] + ins[20:24]
     rs2 = regBinToName[ins[7:12]]
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
     if funct3 == "000": #beq
+        print("cause1\n")
         if rs1 == rs2:
             # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin+"0"))
             # PC = binary_to_hex(t)
+        else:
+            PC = add_twos_complement(PC, "100")
+
     elif funct3 == "001": #bne
+        print("cause2\n")
         if rs1 != rs2:
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
+        else:
+            PC = add_twos_complement(PC, "100")
     elif funct3 == "100": #blt
+        print("cause3\n")
         if sext(rs1) < sext(rs2):
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
+        else:
+            PC = add_twos_complement(PC, "100")
     elif funct3 == "101":#bge
+        print("cause4\n")
         if sext(rs1) >= sext(rs2):
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
+        else:
+            PC = add_twos_complement(PC, "100")
 
 def func_U(ins,PC):
-    # global PC
     imm = ins[0:20]
     opcode = ins[25:]
     if opcode == "0110111": #lui
@@ -328,48 +322,58 @@ def func_U(ins,PC):
 def func_J(ins):
     global PC
     imm = ins[0:20]
-   # rd = ins[20:25
     r_imm = imm[0] + imm[12:20] + imm[11] + imm[1:11]
     r_imm = sign_extend(r_imm + "0")
     rd = add_twos_complement(PC, unsigned("100")) #rd = PC+4
-    # PC = hex_to_binary(PC)
     PC = add_twos_complement(PC, r_imm)
-    # PC = binary_to_hex(PC)
     PC = PC[:-1] + "0"
     regBinToName[ins[20:25]] = rd
 
 l = dict()
 for i in range(len(li)):
     l[decimal_to_unsigned_binary(i*4)] = li[i]
-    # i+=1
 
 while True:
     ins = l[PC]
     ins_type = get_instruction_type(ins)
+    print("HERE\n")
     if ins_type == "R":
+        print("HEREr\n")
         func_R(ins)
         PC = add_twos_complement(PC, "100")
+        
     elif ins_type == "I":
+        print("HEREi\n")
         func_I(ins)
     elif ins_type == "S":
+        print("HEREs\n")
         func_S(ins)
         PC = add_twos_complement(PC, "100")
     elif ins_type == "B":
+        print("HEREb\n")
         func_B(ins)
         if ins == "00000000000000000000000001100011": #Halt
             break
     elif ins_type == "U":
+        print("HEREu\n")
         func_U(ins,PC)
         PC = add_twos_complement(PC, "100")
     elif ins_type == "J":
+        print("HEREj\n")
         func_J(ins)
+
     regBinToName["00000"] = "00000000000000000000000000000000"
-    with open('C:\\Users\\nikhil\\Desktop\\output.txt') as f:
-        f.write("0b" + PC + " ")
+    with open('C:\\Users\\nikhil\\Desktop\\Testing\\output.txt',"a") as f:
+        s= "0b" + PC + " "
+        f.write(s)
         for i in regBinToName.values():
-            f.write("0b" + i + " ")
-with open('C:\\Users\\nikhil\\Desktop\\output.txt') as f:
+            x = "0b" + i + " "
+            f.write(x)
         f.write("\n")
-        for i in mem_data.values():
-            f.write("0b" + i + " ")
-    
+
+
+with open('C:\\Users\\nikhil\\Desktop\\Testing\\output.txt',"a") as f:
+        for i in data_mem.keys():
+            t = i + ":0b" + data_mem[i] + "\n"
+            f.write(t)
+  
