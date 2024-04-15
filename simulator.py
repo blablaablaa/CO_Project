@@ -1,4 +1,4 @@
-with open('C:\\Users\\Vikram\\Desktop\\binary.txt') as f:
+with open('C:\\Users\\nikhil\\Desktop\\binary.txt') as f:
     list = f.readlines()
     li = []
     for i in list:
@@ -74,16 +74,17 @@ def bitwise_xor(binary1, binary2):
 
 def sext(binary_str):
     return binary_to_decimal_twos_complement(binary_str)
-
+# if binary str is of imm then it is error
 def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement binary to decimal
     if binary_str[0] == '1':
         binary_str = ''.join(['1' if bit == '0' else '0' for bit in binary_str])
-        binary_str = bin(int(binary_str, 2) + 1)[2:].zfill(32)
-        decimal_value = int(binary_str, 2)
+        # binary_str = bin(int(binary_str, 2) + 1)[2:].zfill(32)
+        decimal_value = int(binary_str, 2) + 1
         decimal_value = -decimal_value
     else:
         decimal_value = int(binary_str, 2)
     return decimal_value
+# iska nam sext nahi hona chaiye
 def unsigned(binary_str):
     num_zeroes = 32 - len(binary_str)
     extended_str = '0' * num_zeroes + binary_str
@@ -252,20 +253,20 @@ def func_I(ins):
         rd = data_mem[mem_ind]
         regBinToName[ins[20:25]] = rd
         PC = add_twos_complement(PC, "100")
-    elif funct3 == "000": #addi
+    elif funct3 == "011": #sltiu
+        if int(rs1,2) < int(sign_extend(imm_bin),2):
+            rd = "00000000000000000000000000000001"   
+        else:
+            rd = "00000000000000000000000000000000"
+        regBinToName[ins[20:25]] = rd
+        PC = add_twos_complement(PC, "100")
+    
+    elif funct3 == "000" and ins[25:] == "0010011": #addi
         rd = add_twos_complement(rs1, sign_extend(imm_bin))
         regBinToName[ins[20:25]] = rd
         PC = add_twos_complement(PC, "100")
-    elif funct3 == "011": #sltiu
-        if int(rs1,2) < int(sign_extend(imm_bin),2):
-            rd = "00000000000000000000000000000001"
-            regBinToName[ins[20:25]] = rd
-            PC = add_twos_complement(PC, "100")
-        else:
-            rd = "00000000000000000000000000000000"
-            regBinToName[ins[20:25]] = rd
-            PC = add_twos_complement(PC, "100")
-    elif funct3 == "000": #jalr
+    
+    elif funct3 == "000" and ins[25:] == "1100111": #jalr
         # global PC
         rd = add_twos_complement(PC, unsigned("100"))  # rd = PC+4
         PC = add_twos_complement(rs1, sign_extend(imm_bin))
@@ -306,7 +307,7 @@ def func_B(ins):
             # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
             # PC = binary_to_hex(t)
-    elif funct3 == "101":
+    elif funct3 == "101":#bge
         if sext(rs1) >= sext(rs2):
             # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
@@ -327,11 +328,12 @@ def func_U(ins,PC):
 def func_J(ins):
     global PC
     imm = ins[0:20]
-   # rd = ins[20:25]
-    imm = sign_extend(imm + "0")
+   # rd = ins[20:25
+    r_imm = imm[0] + imm[12:20] + imm[11] + imm[1:11]
+    r_imm = sign_extend(r_imm + "0")
     rd = add_twos_complement(PC, unsigned("100")) #rd = PC+4
     # PC = hex_to_binary(PC)
-    PC = add_twos_complement(PC, imm)
+    PC = add_twos_complement(PC, r_imm)
     # PC = binary_to_hex(PC)
     PC = PC[:-1] + "0"
     regBinToName[ins[20:25]] = rd
@@ -361,3 +363,13 @@ while True:
         PC = add_twos_complement(PC, "100")
     elif ins_type == "J":
         func_J(ins)
+    regBinToName["00000"] = "00000000000000000000000000000000"
+    with open('C:\\Users\\nikhil\\Desktop\\output.txt') as f:
+        f.write("0b" + PC + " ")
+        for i in regBinToName.values():
+            f.write("0b" + i + " ")
+with open('C:\\Users\\nikhil\\Desktop\\output.txt') as f:
+        f.write("\n")
+        for i in mem_data.values():
+            f.write("0b" + i + " ")
+    
