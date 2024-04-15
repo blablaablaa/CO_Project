@@ -112,7 +112,7 @@ def binary_to_hex(binary_str):
     chunks = [binary_str[i:i + 4] for i in range(0, len(binary_str), 4)]
     hex_str = ''.join(hex(int(chunk, 2))[2:] for chunk in chunks)
     return hex_str
-# 
+#
 # def hex_to_binary(hex_str):
 #     binary_digits = [bin(int(hex_digit, 16))[2:].zfill(4) for hex_digit in hex_str]
 #     binary_str = ''.join(binary_digits)
@@ -120,7 +120,6 @@ def binary_to_hex(binary_str):
 #     return binary_str
 
 PC = "00000000"
-
 data_mem = {
     "0x00010000":"00000000000000000000000000000000",
     "0x00010004":"00000000000000000000000000000000",
@@ -282,35 +281,27 @@ def func_S(ins):
     mem_ind = binary_to_hex(mem_ind)
     mem_ind = "0x" + mem_ind
     data_mem[mem_ind] = rs2
-    
+
 
 
 def func_B(ins):
     global PC
-    imm_bin = ins[0:7] + ins[20:25]
+    imm_bin = ins[0] + ins[24] + ins[1:7] + ins[20:24]
     rs2 = regBinToName[ins[7:12]]
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
     if funct3 == "000": #beq
         if rs1 == rs2:
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin+"0"))
-            # PC = binary_to_hex(t)
     elif funct3 == "001": #bne
         if rs1 != rs2:
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
     elif funct3 == "100": #blt
         if sext(rs1) < sext(rs2):
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
     elif funct3 == "101":
         if sext(rs1) >= sext(rs2):
-            # t = hex_to_binary(PC)
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
-            # PC = binary_to_hex(t)
 
 def func_U(ins,PC):
     # global PC
@@ -322,24 +313,20 @@ def func_U(ins,PC):
     elif opcode == "0010111": #auipc
         rd = add_twos_complement(imm + 12*"0", PC)
         regBinToName[ins[20:25]] = rd
-    
+
 
 def func_J(ins):
     global PC
-    imm = ins[0:20]
-   # rd = ins[20:25]
+    imm = ins[0] + ins[12:20] + ins[11] + ins[1:11]
     imm = sign_extend(imm + "0")
     rd = add_twos_complement(PC, unsigned("100")) #rd = PC+4
-    # PC = hex_to_binary(PC)
     PC = add_twos_complement(PC, imm)
-    # PC = binary_to_hex(PC)
     PC = PC[:-1] + "0"
     regBinToName[ins[20:25]] = rd
 
 l = dict()
 for i in range(len(li)):
     l[decimal_to_unsigned_binary(i*4)] = li[i]
-    # i+=1
 
 while True:
     ins = l[PC]
