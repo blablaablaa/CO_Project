@@ -1,4 +1,4 @@
-with open('C:\\Users\\Vikram\\Desktop\\binary.txt') as f:
+with open('C:\\Users\\Vikram\\Desktop\\CO_TSET.txt') as f:
     list = f.readlines()
     li = []
     for i in list:
@@ -72,9 +72,6 @@ def bitwise_xor(binary1, binary2):
     result_binary = bin(result)[2:].zfill(len(binary1))
     return result_binary
 
-def sext(binary_str):
-    return binary_to_decimal_twos_complement(binary_str)
-
 def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement binary to decimal
     if binary_str[0] == '1':
         binary_str = ''.join(['1' if bit == '0' else '0' for bit in binary_str])
@@ -84,6 +81,10 @@ def binary_to_decimal_twos_complement(binary_str):  ##converts 2's complement bi
     else:
         decimal_value = int(binary_str, 2)
     return decimal_value
+def sext(binary_str):
+    return binary_to_decimal_twos_complement(binary_str)
+
+
 def unsigned(binary_str):
     num_zeroes = 32 - len(binary_str)
     extended_str = '0' * num_zeroes + binary_str
@@ -119,7 +120,7 @@ def binary_to_hex(binary_str):
 #     binary_str = binary_str.zfill(32)
 #     return binary_str
 
-PC = "00000000"
+PC = "00000000000000000000000000000000"
 data_mem = {
     "0x00010000":"00000000000000000000000000000000",
     "0x00010004":"00000000000000000000000000000000",
@@ -156,7 +157,7 @@ data_mem = {
 }
 regBinToName = {"00000": "00000000000000000000000000000000",
                 "00001": "00000000000000000000000000000000",
-                "00010": "00000000000000000000000000000000",
+                "00010": "00000000000000000000000100000000",
                 "00011": "00000000000000000000000000000000",
                 "00100": "00000000000000000000000000000000",
                 "00101": "00000000000000000000000000000000",
@@ -243,6 +244,7 @@ def func_I(ins):
     rs1 = regBinToName[ins[12:17]]
     funct3 = ins[17:20]
     rd = regBinToName[ins[20:25]]
+    opcode = ins[25:]
     global PC
     if funct3 == "010": #lw
         mem_ind = add_twos_complement(rs1, sign_extend(imm_bin))
@@ -251,7 +253,7 @@ def func_I(ins):
         rd = data_mem[mem_ind]
         regBinToName[ins[20:25]] = rd
         PC = add_twos_complement(PC, "100")
-    elif funct3 == "000": #addi
+    elif funct3 == "000" and opcode == "0010011": #addi
         rd = add_twos_complement(rs1, sign_extend(imm_bin))
         regBinToName[ins[20:25]] = rd
         PC = add_twos_complement(PC, "100")
@@ -269,6 +271,7 @@ def func_I(ins):
         rd = add_twos_complement(PC, unsigned("100"))  # rd = PC+4
         PC = add_twos_complement(rs1, sign_extend(imm_bin))
         PC = PC[:-1] + "0"
+        # print("PC:", PC)
         regBinToName[ins[20:25]] = rd
 
 def func_S(ins):
@@ -282,8 +285,6 @@ def func_S(ins):
     mem_ind = "0x" + mem_ind
     data_mem[mem_ind] = rs2
 
-
-
 def func_B(ins):
     global PC
     imm_bin = ins[0] + ins[24] + ins[1:7] + ins[20:24]
@@ -293,15 +294,23 @@ def func_B(ins):
     if funct3 == "000": #beq
         if rs1 == rs2:
             PC = add_twos_complement(PC, sign_extend(imm_bin+"0"))
+        else:
+            PC = add_twos_complement(PC, "100")
     elif funct3 == "001": #bne
         if rs1 != rs2:
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+        else:
+            PC = add_twos_complement(PC, "100")
     elif funct3 == "100": #blt
         if sext(rs1) < sext(rs2):
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+        else:
+            PC = add_twos_complement(PC, "100")
     elif funct3 == "101":
         if sext(rs1) >= sext(rs2):
             PC = add_twos_complement(PC, sign_extend(imm_bin + "0"))
+        else:
+            PC = add_twos_complement(PC, "100")
 
 def func_U(ins,PC):
     # global PC
@@ -327,7 +336,9 @@ def func_J(ins):
 l = dict()
 for i in range(len(li)):
     l[decimal_to_unsigned_binary(i*4)] = li[i]
-
+# print(l)
+with open('binary.txt', 'w') as f:
+    f.write("")
 while True:
     ins = l[PC]
     ins_type = get_instruction_type(ins)
@@ -341,10 +352,26 @@ while True:
         PC = add_twos_complement(PC, "100")
     elif ins_type == "B":
         func_B(ins)
-        if ins == "00000000000000000000000001100011": #Halt
-            break
+
     elif ins_type == "U":
         func_U(ins,PC)
         PC = add_twos_complement(PC, "100")
     elif ins_type == "J":
         func_J(ins)
+    regBinToName["00000"] = "00000000000000000000000000000000"
+    # print(PC)
+    # print(regBinToName)
+    # print(data_mem)
+    with open('binary.txt', 'a') as f:
+        f.write("0b" + PC + " ")
+        for key,value in regBinToName.items():
+            f.write("0b" +value + " ")
+        f.write("\n")
+    if ins == "00000000000000000000000001100011":
+        print("HALT MET")
+        break
+with open('binary.txt', 'a') as f:
+    for key,value in data_mem.items():
+        f.write(key + ":0b" + value + "\n")
+for key,val in l.items():
+    print(key,val)
