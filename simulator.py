@@ -388,7 +388,7 @@ with open(output_file, 'w') as f:
     f.write("")
 while True:
     ins = l[PC]
-    print("ins", ins)
+    # print("ins", ins)
     ins_type = get_instruction_type(ins)
     if ins_type == "R":
         func_R(ins)
@@ -424,5 +424,5 @@ while True:
 with open(output_file, 'a') as f:
     for key, value in data_mem.items():
         f.write(key + ":0b" + value + "\n")
-for key,val in l.items():
-    print(key,val)
+# for key,val in l.items():
+#     print(key,val)
