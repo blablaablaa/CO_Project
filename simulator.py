@@ -345,13 +345,14 @@ def func_Bonus(ins):
     opcode = ins[25:]
     if opcode == "0000000":
         return
-    if opcode == "1111111":
+    if opcode == "1111111": #reset (rst)
         for i in regBinToName.keys():
             regBinToName[i] = "00000000000000000000000000000000"
+        regBinToName["00010"] = "00000000000000000000000100000000"
         return
-    if opcode == "1100110":
+    if opcode == "1100110": #rvrs
         rs = regBinToName[ins[12:17]]
-        rd = rs[:-1]
+        rd = rs[::-1]
         regBinToName[ins[20:25]] = rd
         return
         
