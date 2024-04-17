@@ -400,5 +400,5 @@ while True:
 with open('binary.txt', 'a') as f:
     for key,value in data_mem.items():
         f.write(key + ":0b" + value + "\n")
-for key,val in l.items():
-    print(key,val)
+# for key,val in l.items():
+#     print(key,val)
