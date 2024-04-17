@@ -227,7 +227,7 @@ def convertJ(instruction, index):
     return f'{imm_b[11]}{imm_b[21:31]}{imm_b[20]}{imm_b[12:20]}{regABItoBinary[rd]}{opcode}'
 
 def convertBonus(instruction):
-    if innstruction[0] == "halt":
+    if instruction[0] == "halt":
         return "00000000000000000000000000000000"
     if instruction[0] == "rst":
         return "11111111111111111111111111111111"
@@ -235,8 +235,8 @@ def convertBonus(instruction):
         opcode = "1100110"
         rd, rs = instruction[1].split(',')
         try:
-        regABItoBinary[rd]
-        regABItoBinary[rs]
+            regABItoBinary[rd]
+            regABItoBinary[rs]
         except:
             return -1
         return f'000000000000{rs}000{rd}{opcode}'
