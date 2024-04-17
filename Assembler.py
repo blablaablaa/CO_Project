@@ -10,12 +10,13 @@ with open(input_file, 'r') as f:
 with open(output_file, 'w') as f:
     f.write("")
 
-R_type = ["add", "sub", "slt", "sltu", "xor", "sll", "srl", "or", "and"]
+R_type = ["add", "sub","mul" "slt", "sltu", "xor", "sll", "srl", "or", "and"]
 I_type = ["lb", "lh", "lw", "ld", "addi", "sltiu", "jalr"]
 S_type = ["sb", "sh", "sw", "sd"]
 B_type = ["beq", "bne", "bge", "bgeu", "blt", "bltu"]
 U_type = ["auipc", "lui"]
 J_type = ["jal"]
+Bonus_type = ["rst","halt","rvrs"]
 
 label = {}
 
@@ -75,12 +76,15 @@ def getInstructionType(ins):
         return "U"
     if ins in J_type:
         return "J"
+    if ins in Bonus_type:
+        return "Bonus"
     return "INVALID"
 
 
 def convertR(instruction):
     funct3 = {"add": "000",
               "sub": "000",
+              "mul": "000",
               "sll": "001",
               "slt": "010",
               "sltu": "011",
@@ -102,6 +106,9 @@ def convertR(instruction):
 
     if instruction[0] == "sub":
         return (f'0100000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
+                f'{regABItoBinary[rd]}{opcode}')
+    if instruction[0] == "mul":
+        return (f'1111111{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
                 f'{regABItoBinary[rd]}{opcode}')
     return (f'0000000{regABItoBinary[rs2]}{regABItoBinary[rs1]}{funct3[instruction[0]]}'
             f'{regABItoBinary[rd]}{opcode}')
@@ -219,6 +226,21 @@ def convertJ(instruction, index):
         return -1
     return f'{imm_b[11]}{imm_b[21:31]}{imm_b[20]}{imm_b[12:20]}{regABItoBinary[rd]}{opcode}'
 
+def convertBonus(instruction):
+    if innstruction[0] == "halt":
+        return "00000000000000000000000000000000"
+    if instruction[0] == "rst":
+        return "11111111111111111111111111111111"
+    if instruction[0] == "rvrs":
+        opcode = "1100110"
+        rd, rs = instruction[1].split(',')
+        try:
+        regABItoBinary[rd]
+        regABItoBinary[rs]
+        except:
+            return -1
+        return f'000000000000{rs}000{rd}{opcode}'
+
 
 l = [instruction for instruction in l if instruction]
 for address_instruction in range(len(l)):
@@ -246,6 +268,8 @@ for index in range(len(l)):
         s = convertU(instruction)
     elif ins_type == "J":
         s = convertJ(instruction,index)
+    elif ins_type == "Bonus":
+        s = convertBonus(instruction)
     else:
         # print(instruction[0])
         with open(output_file, mode='w') as f:
