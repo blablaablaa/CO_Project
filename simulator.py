@@ -395,7 +395,7 @@ while True:
             f.write("0b" +value + " ")
         f.write("\n")
     if ins == "00000000000000000000000001100011" or "00000000000000000000000000000000":
-        print("HALT MET")
+        # print("HALT MET")
         break
 with open('binary.txt', 'a') as f:
     for key,value in data_mem.items():
