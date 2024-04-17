@@ -20,6 +20,8 @@ def get_instruction_type(ins):
         return "U"
     if opcode == "1101111":
         return "J"
+    if opcode == "1111111" or "0000000" or "1100110":
+        return "Bonus"
     return "Z"
 
 
@@ -238,6 +240,13 @@ def func_R(ins):
         rd = rs1-rs2
         rd = decimal_to_twos_complement(rd)
         regBinToName[ins[20:25]] = rd
+    elif funct7 == "1111111":#mul
+        rs1 = sext(rs1)
+        rs2 = sext(rs2)
+        rd = rs1*rs2
+        rd = decimal_to_twos_complement(rd)
+        regBinToName[ins[20:25]] = rd
+        
 
 def func_I(ins):
     imm_bin = ins[0:12]
@@ -332,6 +341,20 @@ def func_J(ins):
     PC = add_twos_complement(PC, imm)
     PC = PC[:-1] + "0"
     regBinToName[ins[20:25]] = rd
+def func_Bonus(ins):
+    opcode = ins[25:]
+    if opcode == "0000000":
+        return
+    if opcode == "1111111":
+        for i in regBinToName.keys():
+            regBinToName[i] = "00000000000000000000000000000000"
+        return
+    if opcode == "1100110":
+        rs = regBinToName[ins[12:17]]
+        rd = rs[:-1]
+        regBinToName[ins[20:25]] = rd
+        return
+        
 
 l = dict()
 for i in range(len(li)):
@@ -358,6 +381,9 @@ while True:
         PC = add_twos_complement(PC, "100")
     elif ins_type == "J":
         func_J(ins)
+    elif ins_type == "Bonus":
+        func_Bonus(ins)
+        PC = add_twos_complement(PC, "100")
     regBinToName["00000"] = "00000000000000000000000000000000"
     # print(PC)
     # print(regBinToName)
@@ -367,7 +393,7 @@ while True:
         for key,value in regBinToName.items():
             f.write("0b" +value + " ")
         f.write("\n")
-    if ins == "00000000000000000000000001100011":
+    if ins == "00000000000000000000000001100011" or "00000000000000000000000000000000":
         print("HALT MET")
         break
 with open('binary.txt', 'a') as f:
