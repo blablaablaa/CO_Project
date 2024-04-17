@@ -1,7 +1,7 @@
 import sys
 input_file = sys.argv[1]
 output_file = sys.argv[2]
-with open(output_file) as f:
+with open(input_file) as f:
     list = f.readlines()
     li = []
     for i in list:
@@ -384,7 +384,7 @@ l = dict()
 for i in range(len(li)):
     l[decimal_to_unsigned_binary(i * 4)] = li[i]
 # print(l)
-with open(input_file, 'w') as f:
+with open(output_file, 'w') as f:
     f.write("")
 while True:
     ins = l[PC]
@@ -413,7 +413,7 @@ while True:
     # print(PC)
     # print(regBinToName)
     # print(data_mem)
-    with open(input_file, 'a') as f:
+    with open(output_file, 'a') as f:
         f.write("0b" + PC + " ")
         for key, value in regBinToName.items():
             f.write("0b" + value + " ")
@@ -421,7 +421,7 @@ while True:
     if ins == "00000000000000000000000001100011" or ins =="00000000000000000000000000000000":
         # print("HALT MET")
         break
-with open(input_file, 'a') as f:
+with open(output_file, 'a') as f:
     for key, value in data_mem.items():
         f.write(key + ":0b" + value + "\n")
 for key,val in l.items():
