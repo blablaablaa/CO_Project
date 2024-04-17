@@ -246,9 +246,17 @@ l = [instruction for instruction in l if instruction]
 for address_instruction in range(len(l)):
     instruct = l[address_instruction]
     if ":" in instruct[0]:
-        lab = instruct[0][:-1]
-        label[lab] = address_instruction
-        l[address_instruction] = instruct[1:]
+        if len(instruct[0]) - instruct[0].index(":") -1 == 0:
+            lab = instruct[0][:-1]
+            label[lab] = address_instruction
+            l[address_instruction] = instruct[1:]
+        else:
+            y = instruct[0].split(":")
+            lab = y[0]
+            label[lab] = address_instruction
+            # lii = [y[1]]+ instruct[1:]
+            # print(lii)
+            l[address_instruction] = [y[1]]+(instruct[1:])
 # print(l)
 l = [instruction for instruction in l if instruction]
 for index in range(len(l)):
