@@ -1,7 +1,8 @@
 import sys
 input_file = sys.argv[1]
 output_file = sys.argv[2]
-
+# output_file = 'binary.txt'
+# input_file = 'lalala'
 with open(input_file, 'r') as f:
     list = f.readlines()
     l = []
@@ -10,7 +11,7 @@ with open(input_file, 'r') as f:
 with open(output_file, 'w') as f:
     f.write("")
 
-R_type = ["add", "sub","mul" "slt", "sltu", "xor", "sll", "srl", "or", "and"]
+R_type = ["add", "sub","mul", "slt", "sltu", "xor", "sll", "srl", "or", "and"]
 I_type = ["lb", "lh", "lw", "ld", "addi", "sltiu", "jalr"]
 S_type = ["sb", "sh", "sw", "sd"]
 B_type = ["beq", "bne", "bge", "bgeu", "blt", "bltu"]
@@ -281,7 +282,7 @@ for index in range(len(l)):
     else:
         # print(instruction[0])
         with open(output_file, mode='w') as f:
-            # print(instruction)
+            print(instruction)
             print("ERROR..Invalid Instruction name")
             f.write("ERROR..Invalid Instruction name")
         break
