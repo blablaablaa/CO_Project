@@ -240,7 +240,7 @@ def convertBonus(instruction):
             regABItoBinary[rs]
         except:
             return -1
-        return f'000000000000{rs}000{rd}{opcode}'
+        return f'000000000000{regABItoBinary[rs]}000{regABItoBinary[rd]}{opcode}'
 
 
 l = [instruction for instruction in l if instruction]
