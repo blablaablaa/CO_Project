@@ -279,6 +279,8 @@ for index in range(len(l)):
         s = convertJ(instruction,index)
     elif ins_type == "Bonus":
         s = convertBonus(instruction)
+        if instruction == ["halt"]:
+            VH = True
     else:
         # print(instruction[0])
         with open(output_file, mode='w') as f:
