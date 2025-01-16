@@ -1,9 +1,14 @@
-# CO_Project
-This is a first-year project for Computer Oraganisation Class
-Our First Task it to make a program than can perforn the following functions
-: Read given assembly language input 
-: For corresponding instruction write its binary
-: give the resulting machine code
-Further task includes 
-: Making a simulator that tells what are the values stored in each registor after each instructions.
-The ISA we are working with here is RV321 or RISC-V.
+# CO_Project  
+
+This is a first-year project for the **Computer Organization** class.  
+
+## Project Overview  
+Our first task is to develop an **assembler** that can perform the following functions:  
+- Read a given **assembly language** input.  
+- Convert each instruction into its corresponding **binary representation**.  
+- Generate the resulting **machine code**.  
+
+Further tasks include:  
+- Creating a **simulator** that tracks the values stored in each register after executing each instruction.  
+
+The **ISA** (Instruction Set Architecture) we are working with is **RV32I (RISC-V)**.  
